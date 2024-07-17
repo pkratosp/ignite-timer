@@ -18,27 +18,11 @@ export interface CyclesState {
 export function CyclesReducer(state: CyclesState, action: any) {
   switch (action.type) {
     case ActionsType.ADDNEWCYCLE:
-      // return {
-      //   ...state,
-      //   cycles: [...state.cycles, action.payload.newCycle],
-      //   activeCycleId: action.payload.newCycle.id,
-      // }
       return produce(state, (draft) => {
         draft.cycles.push(action.payload.newCycle)
         draft.activeCycleId = action.payload.newCycle.id
       })
     case ActionsType.INTERRUPT_CURRENT_CYCLE: {
-      // return {
-      //   ...state,
-      //   cycles: state.cycles.map((cycle) => {
-      //     if (cycle.id === state.activeCycleId) {
-      //       return { ...cycle, interuptDate: new Date() }
-      //     } else {
-      //       return cycle
-      //     }
-      //   }),
-      //   activeCycleId: null,
-      // }
       const currentCycleIndex = state.cycles.findIndex(
         (cycle) => cycle.id === state.activeCycleId,
       )
@@ -52,18 +36,6 @@ export function CyclesReducer(state: CyclesState, action: any) {
       })
     }
     case ActionsType.MARK_CURRENT_CYCLE_AS_FINISHED: {
-      // return {
-      //   ...state,
-      //   cycles: state.cycles.map((cycle) => {
-      //     if (cycle.id === state.activeCycleId) {
-      //       return { ...cycle, finishedDate: new Date() }
-      //     } else {
-      //       return cycle
-      //     }
-      //   }),
-      //   activeCycleId: null,
-      // }
-
       const currentCycleIndex = state.cycles.findIndex(
         (cycle) => cycle.id === state.activeCycleId,
       )

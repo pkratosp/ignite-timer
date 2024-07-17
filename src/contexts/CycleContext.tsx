@@ -1,10 +1,17 @@
-import { createContext, ReactNode, useReducer, useState } from 'react'
+import {
+  createContext,
+  ReactNode,
+  useEffect,
+  useReducer,
+  useState,
+} from 'react'
 import { Cycle, CyclesReducer } from '../reducers/cycles/reducer'
 import {
   addNewCycleAction,
   interruptCUrrentCycleAction,
   markCurrentCycleAsFinishedAction,
 } from '../reducers/cycles/actions'
+import { differenceInSeconds } from 'date-fns'
 type IFormData = {
   minutesAmout: number
   task: string
@@ -28,15 +35,40 @@ interface Props {
 }
 
 export function CyclesContextProvider({ children }: Props) {
-  const [cyclesState, dispatch] = useReducer(CyclesReducer, {
-    cycles: [],
-    activeCycleId: '',
-  })
+  const [cyclesState, dispatch] = useReducer(
+    CyclesReducer,
+    {
+      cycles: [],
+      activeCycleId: '',
+    },
+    (initalState) => {
+      const storageStateAsJSON = localStorage.getItem(
+        '@ignite-timer:cycles-state-1.0.0',
+      )
+
+      if (storageStateAsJSON) {
+        return JSON.parse(storageStateAsJSON)
+      }
+
+      return initalState
+    },
+  )
   const { cycles, activeCycleId } = cyclesState
 
-  // const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(0)
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState<number>(() => {
+    if (activeCycle) {
+      return differenceInSeconds(new Date(), new Date(activeCycle.startDate))
+    }
+
+    return 0
+  })
+
+  useEffect(() => {
+    const stateJSON = JSON.stringify(cyclesState)
+
+    localStorage.setItem('@ignite-timer:cycles-state-1.0.0', stateJSON)
+  }, [cyclesState])
 
   function setSecondsPassad(seconds: number) {
     setAmountSecondsPassed(seconds)
@@ -60,7 +92,7 @@ export function CyclesContextProvider({ children }: Props) {
   }
 
   function interruptCycle() {
-    dispatch(interruptCUrrentCycleAction)
+    dispatch(interruptCUrrentCycleAction())
   }
   return (
     <CyclesContext.Provider
